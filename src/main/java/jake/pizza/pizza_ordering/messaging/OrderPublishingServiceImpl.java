@@ -15,7 +15,6 @@ public class OrderPublishingServiceImpl implements OrderPublishingService {
 
     @Override
     public void sendMessage(String topicName, String message) {
-        // kafkaTemplate.send(topic, message);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topicName, message);
         future.whenComplete((result, ex) -> {
             if (ex == null) {

@@ -20,6 +20,9 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.producer.bootstrap-servers}")
     private String bootstrapAddress;
 
+    @Value("${spring.kafka.producer.request-timeout-ms}")
+    private int requestTimeoutMS;
+
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -32,6 +35,7 @@ public class KafkaProducerConfig {
         configProps.put(
           ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 
           StringSerializer.class);
+        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeoutMS);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 

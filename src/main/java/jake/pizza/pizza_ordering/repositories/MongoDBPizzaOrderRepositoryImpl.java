@@ -11,10 +11,14 @@ import com.mongodb.TransactionOptions;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+
+import org.bson.BsonDocument;
 import org.bson.types.ObjectId;
 import jakarta.annotation.PostConstruct;
 import jake.pizza.pizza_ordering.models.PizzaOrder;
 import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.client.ClientSession;
+
 
 @Repository
 public class MongoDBPizzaOrderRepositoryImpl implements PizzaOrderRepository {
@@ -50,6 +54,25 @@ public class MongoDBPizzaOrderRepositoryImpl implements PizzaOrderRepository {
     @Override
     public PizzaOrder findOne(String id) {
         return pizzaOrderCollection.find(eq("_id", new ObjectId(id))).first();
+    }
+
+    @Override
+    public List<PizzaOrder> saveAll(List<PizzaOrder> pizzaOrders) {
+        try (ClientSession clientSession = client.startSession()) {
+            return clientSession.withTransaction(() -> {
+                pizzaOrders.forEach(p -> p.setId(new ObjectId()));
+                pizzaOrderCollection.insertMany(clientSession, pizzaOrders);
+                return pizzaOrders;
+            }, txnOptions);
+        }
+    }
+
+    @Override
+    public long deleteAll() {
+        try (ClientSession clientSession = client.startSession()) {
+            return clientSession.withTransaction(
+                    () -> pizzaOrderCollection.deleteMany(clientSession, new BsonDocument()).getDeletedCount(), txnOptions);
+        }
     }
 
 }

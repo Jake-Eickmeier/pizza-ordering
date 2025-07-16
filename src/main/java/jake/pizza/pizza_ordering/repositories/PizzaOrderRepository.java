@@ -14,4 +14,8 @@ public interface PizzaOrderRepository {
     public PizzaOrder findOne(String id);
 
     public PizzaOrder save(PizzaOrder pizzaOrder);
+
+    public List<PizzaOrder> saveAll(List<PizzaOrder> pizzaOrders);
+
+    public long deleteAll();
 }
